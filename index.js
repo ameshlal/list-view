@@ -3,11 +3,15 @@
 
 module.exports = {
   name: 'ember-list-view',
+  isDevelopingAddon: function(){
+    return true;
+  },
   treeForVendor: function() {
 
     if(!this.isDevelopingAddon()) {
       return;
     }
+    return;
 
 
     var klassy = new this.Funnel('bower_components', {

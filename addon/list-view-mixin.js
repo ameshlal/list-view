@@ -545,7 +545,6 @@ export default Ember.Mixin.create({
     @method _numChildViewsForViewport
   */
   _numChildViewsForViewport: function() {
-
     if (this.heightForIndex) {
       return this._numChildViewsForViewportWithMultiHeight();
     } else {
@@ -581,7 +580,6 @@ export default Ember.Mixin.create({
         break;
       }
     }
-
     return i + padding + 1;
   },
 
@@ -806,23 +804,30 @@ export default Ember.Mixin.create({
     var contentLength, childViews, childViewsLength,
         startingIndex, endingIndex, childView, attrs,
         contentIndex, visibleEndingIndex, maxContentIndex,
-        contentIndexEnd, scrollTop;
+        contentIndexEnd, scrollTop, viewsNeededForViewport, notEnoughForContent, notViewportViewCount;
 
-    scrollTop          = this.scrollTop;
-    contentLength      = get(this, 'content.length');
-    maxContentIndex    = max(contentLength - 1, 0);
-    childViews         = this.getReusableChildViews();
-    childViewsLength   =  childViews.length;
+    scrollTop              = this.scrollTop;
+    contentLength          = get(this, 'content.length');
+    maxContentIndex        = max(contentLength - 1, 0);
+    childViews             = this.getReusableChildViews();
+    childViewsLength       =  childViews.length;
 
-    startingIndex      = this._startingIndex();
-    visibleEndingIndex = startingIndex + this._numChildViewsForViewport();
+    viewsNeededForViewport = this._numChildViewsForViewport();
+    startingIndex          = this._startingIndex();
+    visibleEndingIndex     = startingIndex + viewsNeededForViewport;
 
-    endingIndex        = min(maxContentIndex, visibleEndingIndex);
+    endingIndex            = min(maxContentIndex, visibleEndingIndex);
 
-    contentIndexEnd    = min(visibleEndingIndex, startingIndex + childViewsLength);
+    contentIndexEnd        = min(visibleEndingIndex, startingIndex + childViewsLength);
+
+    notEnoughForContent    = childViewsLength < contentLength;
+    notViewportViewCount   = childViewsLength !== viewsNeededForViewport;
+    if(notViewportViewCount && notEnoughForContent){
+      this._syncChildViews();
+    }
 
     for (contentIndex = startingIndex; contentIndex < contentIndexEnd; contentIndex++) {
-      childView = childViews[contentIndex % childViewsLength];
+      childView = childViews[contentIndex % viewsNeededForViewport];
       this._reuseChildForContentIndex(childView, contentIndex);
     }
   },
