@@ -354,6 +354,10 @@ export default Ember.Mixin.create({
       childView.destroy();
       childView = this.createChildView(contentViewClass);
       this.insertAt(i, childView);
+      // We clear the cached height to ensure the heights are recomputed if
+      // a new instance of listItemView is added in place of an existing list view
+      this._cachedHeights = [0];
+      this._cachedPos = 0;
     }
 
     content         = get(this, 'content');
